@@ -4,41 +4,47 @@ author: "Arnav Murulidhar"
 date: "9/6/2020"
 output: html_document
 ---
-# Level 1 title
 
-Here is some text!
+``` {r , message = FALSE}
+library(tidycensus)
+library(tidyverse)
+```
 
-## Level 2 title
+## Variables used: 
+I'd like to look into the relationship between income, property value, unit type (mobile home, detached home, apartment, etc), travel time and mode of transportation.
 
-More text.
+I'm curious to look into patterns of how income level determine housing type and value in LA county and if there are any interesting relationships between income and commute type that have an affect on property value. Therefore my unit of analysis is the person, but also some characteristics of their respective households.
 
+To create my data frame, I have filtered the database for residents of LA county who commute to work and live in a property of value.
+
+1. Property value (continuous) : valp
+2. Units in structure (categorical) : bld
+3. Total person's income (continuous) : pincp
+4. Means of transportation to work (categorical) : jwtr
+5. Travel time to work (continuous) : jwmnp
+
+```{r load person-level data, results = 'hide'}
+person_data <- get_pums(variables = c("PUMA",
+                                      "VALP", 
+                                      "BLD", 
+                                      "PINCP", 
+                                      "JWTR", 
+                                      "JWMNP"),
+                        state = 06,
+                        year = 2018, 
+                        survey = "acs1",
+                        recode = TRUE) %>%
+  filter(JWMNP > 0, VALP > 0, as.numeric(PUMA) >= 03701, as.numeric(PUMA) <= 03769) %>%
+  select(VALP, BLD, PINCP, JWTR, JWMNP)
+```
+The first few rows of my data frame:
+
+```{r show person-level data}
+person_data
+```
+My final dataset has 24,249 rows, which mean my analysis will include 24,249 people.
+
+Finally, I'll create a csv to access the data later:
 ```{r}
-2+2
+write_csv(person_data,"commutersLosAngelesCA2018.csv")
 ```
-
-That was the answer!
-
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
