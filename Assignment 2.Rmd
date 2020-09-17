@@ -1,0 +1,246 @@
+---
+title: "Assignment 2"
+author: "Arnav Murulidhar"
+date: "9/14/2020"
+output: html_document
+---
+
+## Setup
+
+The libraries needed for the assignment:
+
+```{r load libraries, message=FALSE}
+library(tidyverse)
+library(ggplot2)
+```
+
+Then I'll load the dataset from Assignment 1 and attach it to the search path
+
+```{r load and attach data, message=FALSE}
+tract_data <- read_csv("commutersLosAngelesCA2018.csv")
+attach(tract_data)
+```
+
+### List of variables (from Assignment 1):
+
+1. Property value (continuous) : VALP
+
+2. Units in structure (categorical) : BLD
+
+3. Total person's income (continuous) : PINCP
+
+4. Means of transportation to work (categorical) : JWTR
+
+5. Travel time to work (continuous) : JWMNP
+
+## Distribution of Continuous Variables
+
+### Descriptive statistics
+
+First I calculate summary statistics.
+
+```{r}
+prop_summary <-  summary(VALP)
+prop_sd <- sd(VALP, na.rm = TRUE)
+prop_mean_int <- t.test(VALP)
+income_summary <- summary(PINCP)
+income_sd <- sd(PINCP, na.rm = TRUE)
+income_mean_int <- t.test(PINCP)
+commute_summary <- summary(JWMNP)
+commute_sd <- sd(JWMNP, na.rm = TRUE)
+commute_mean_int <- t.test(JWMNP)
+```
+
+And display them in a formatted table:
+
+```{r}
+summary_table <- tibble(
+  Statistic = c("Sample mean", 
+                "Median",
+                "Standard deviation",
+                "Interquartile range",
+                "Population mean (95% confidence)"),
+  `Property value ( $ )` = c(prettyNum(prop_summary["Mean"], digits=3),
+                           prop_summary["Median"],
+                           prettyNum(prop_sd, digits = 3),
+                           paste(prop_summary["1st Qu."],"to", 
+                                 prop_summary["3rd Qu."]),
+                           paste(prettyNum(prop_mean_int$conf.int[1],
+                                           digits=3), "to",
+                                 prettyNum(prop_mean_int$conf.int[2],
+                                               digits=3))),
+  `Income ( $ )` = c(paste(prettyNum(income_summary["Mean"], digits=3)),
+                           paste(prettyNum(income_summary["Median"],digits=3)),
+                           paste(prettyNum(income_sd, digits=3)),
+                           paste(prettyNum(income_summary["1st Qu."], digits=3),
+                                 " to", 
+                                 prettyNum(income_summary["3rd Qu."], digits=3)),
+                           paste(prettyNum(income_mean_int$conf.int[1],
+                                           digits=3), " to",
+                                 prettyNum(income_mean_int$conf.int[2],
+                                           digits=3))),
+  `Commute time (min)` = c(paste(prettyNum(commute_summary["Mean"], digits=3)),
+                          paste(prettyNum(commute_summary["Median"], digits=3)),
+                          paste(prettyNum(commute_sd, digits=3)),
+                          paste(prettyNum(commute_summary["1st Qu."], digits=3), 
+                                " to", 
+                          prettyNum(commute_summary["3rd Qu."], digits=3)),
+                          paste(prettyNum(commute_mean_int$conf.int[1], 
+                                           digits=3), " to",
+                          prettyNum(commute_mean_int$conf.int[2], 
+                                           digits=3))))
+knitr::kable(summary_table, 
+             caption = "Characteristics of census tracts in Los Angeles County")
+```
+
+### Histograms
+
+Now, I'll create histogram for each of these three distributions. 
+
+#### Property Value
+
+```{r}
+ggplot(tract_data, aes(x = VALP)) + 
+  geom_histogram(color = "gray", binwidth = 100000) +
+  theme_bw() +
+  scale_x_continuous(name = "Median property value in tract",
+                     breaks = breaks <- seq(0, 6000000, by = 1000000)) + 
+  scale_y_continuous(name = "Number of properties in sample") 
+```
+
+The distribution of property value looks positively skewed, thus the median value is less than the corresponding mean value. The outlier values increases the mean quite a bit.
+
+#### Income 
+
+```{r}
+ggplot(tract_data, aes(x = PINCP)) + 
+  geom_histogram(color = "gray", binwidth = 10000) +
+  theme_bw() +
+  scale_x_continuous(name = "Income",
+                     breaks = breaks <- seq(0, 1000000, by = 100000)) + 
+  scale_y_continuous(name = "Number of people in sample") 
+```
+
+The distribution of income is also skewed to the right, with a long tail.
+
+#### Commute time
+
+
+```{r}
+ggplot(tract_data, aes(x = JWMNP)) + 
+  geom_histogram(color = "gray", binwidth = 10) +
+  theme_bw() +
+  scale_x_continuous(name = 
+    "Commute time",
+                     breaks = breaks <- seq(0, 140, by = 20)) + 
+  scale_y_continuous(name = "Number of people in sample") 
+```
+
+The distribution of commute time is slightly skewed to the right, with outliers at the 140min mark. However, you can see that the bulk of commute times range between 15-45 minutes.
+
+## Distribution of Categorical Variables
+
+I'll show two tables, one showing the proportions of each category for each of my categorical variables.
+
+### Unit types
+
+First I'll do a t-test for each housing type.
+
+```{r}
+
+one_det <- t.test (BLD == "02")
+three_apt <- t.test (BLD == "05")
+one_att <- t.test (BLD == "03")
+ten_apt <- t.test (BLD == "07")
+mob_home <- t.test (BLD == "01")
+twen_apt <- t.test (BLD == "08")
+fifty_apt <- t.test (BLD == "09")
+five_apt <- t.test (BLD == "06")
+two_apt <- t.test (BLD == "04")
+boat_rv <- t.test (BLD == "10")
+```
+
+Then I'll create a formatted table with proportions and confidence intervals
+
+```{r}
+race_shares <- tibble(Majority_Race = c("One-family house detached",
+                                  "3-4 Apartments",
+                                  "One-family house attached",
+                                  "10-19 Apartments",
+                                  "Mobile home or trailer",
+                                  "20-49 Apartments",
+                                  "50 or more Apartments",
+                                  "5-9 Apartments",
+                                  "2 Apartments",
+                                  "Boat, RV, van, etc."),
+                 Sample_proportion = c(paste(prettyNum(one_det$estimate*100, 
+                                                         digits = 3), "%"),
+                                         paste(prettyNum(three_apt$estimate*100, 
+                                                         digits = 3), "%"),
+                                         paste(prettyNum(one_att$estimate*100, 
+                                                         digits = 3), "%"),
+                                         paste(prettyNum(ten_apt$estimate*100, 
+                                                         digits = 3), "%"),
+                                         paste(prettyNum(mob_home$estimate*100, 
+                                                         digits = 3), "%"),
+                                         paste(prettyNum(twen_apt$estimate*100, 
+                                                         digits = 3), "%"),
+                                         paste(prettyNum(fifty_apt$estimate*100, 
+                                                         digits = 3), "%"),
+                                         paste(prettyNum(five_apt$estimate*100, 
+                                                         digits = 3), "%"),
+                                         paste(prettyNum(two_apt$estimate*100, 
+                                                         digits = 3), "%"),
+                                         paste(prettyNum(boat_rv$estimate*100, 
+                                                         digits = 3), "%")),
+                 `95-percent confidence interval` = c(
+                   paste(prettyNum(one_det$conf.int[1]*100, digits=3),
+                         "% to ",
+                         prettyNum(one_det$conf.int[2]*100, digits=3),
+                         "%", sep=""),
+                   paste(prettyNum(three_apt$conf.int[1]*100, digits=3),
+                         "% to ",
+                         prettyNum(three_apt$conf.int[2]*100, digits=3),
+                         "%", sep=""),
+                   paste(prettyNum(one_att$conf.int[1]*100, digits=3),
+                         "% to ",
+                         prettyNum(one_att$conf.int[2]*100, digits=3),
+                         "%", sep=""),
+                   paste(prettyNum(ten_apt$conf.int[1]*100, digits=3),
+                         "% to ",
+                         prettyNum(ten_apt$conf.int[2]*100, digits=3),
+                         "%", sep=""),
+                   paste(prettyNum(mob_home$conf.int[1]*100, digits=3),
+                         "% to ",
+                         prettyNum(mob_home$conf.int[2]*100, digits=3),
+                         "%", sep=""),
+                   paste(prettyNum(twen_apt$conf.int[1]*100, digits=3),
+                         "% to ",
+                         prettyNum(twen_apt$conf.int[2]*100, digits=3),
+                         "%", sep=""),
+                   paste(prettyNum(fifty_apt$conf.int[1]*100, digits=3),
+                         "% to ",
+                         prettyNum(fifty_apt$conf.int[2]*100, digits=3),
+                         "%", sep=""),
+                   paste(prettyNum(five_apt$conf.int[1]*100, digits=3),
+                         "% to ",
+                         prettyNum(five_apt$conf.int[2]*100, digits=3),
+                         "%", sep=""),
+                   paste(prettyNum(two_apt$conf.int[1]*100, digits=3),
+                         "% to ",
+                         prettyNum(two_apt$conf.int[2]*100, digits=3),
+                         "%", sep=""),
+                   paste(prettyNum(boat_rv$conf.int[1]*100, digits=3),
+                         "% to ",
+                         prettyNum(boat_rv$conf.int[2]*100, digits=3),
+                         "%", sep="")))
+                   
+                   
+knitr::kable(race_shares, caption = "Census tracts in Los Angeles County")
+```
+
+
+
+
+
+
