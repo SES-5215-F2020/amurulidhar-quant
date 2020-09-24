@@ -90,7 +90,7 @@ summary_table <- tibble(
                           prettyNum(commute_mean_int$conf.int[2], 
                                            digits=3))))
 knitr::kable(summary_table, 
-             caption = "Characteristics of census tracts in Los Angeles County")
+             caption = "Characteristics of select data from a census tract in Los Angeles")
 ```
 
 ### Histograms
@@ -104,7 +104,7 @@ ggplot(tract_data, aes(x = VALP)) +
   geom_histogram(color = "gray", binwidth = 100000) +
   theme_bw() +
   scale_x_continuous(name = "Median property value in tract",
-                     breaks = breaks <- seq(0, 6000000, by = 1000000)) + 
+                    breaks = seq(0, 6000000, by = 1000000)) + 
   scale_y_continuous(name = "Number of properties in sample") 
 ```
 
@@ -117,7 +117,7 @@ ggplot(tract_data, aes(x = PINCP)) +
   geom_histogram(color = "gray", binwidth = 10000) +
   theme_bw() +
   scale_x_continuous(name = "Income",
-                     breaks = breaks <- seq(0, 1000000, by = 100000)) + 
+                     breaks = seq(0, 1000000, by = 100000)) + 
   scale_y_continuous(name = "Number of people in sample") 
 ```
 
@@ -132,7 +132,7 @@ ggplot(tract_data, aes(x = JWMNP)) +
   theme_bw() +
   scale_x_continuous(name = 
     "Commute time",
-                     breaks = breaks <- seq(0, 140, by = 20)) + 
+                     breaks = seq(0, 140, by = 20)) + 
   scale_y_continuous(name = "Number of people in sample") 
 ```
 
@@ -163,7 +163,7 @@ boat_rv <- t.test (BLD == "10")
 Then I'll create a formatted table with proportions and confidence intervals
 
 ```{r}
-race_shares <- tibble(Majority_Race = c("One-family house detached",
+struct_shares <- tibble(Struct_types = c("One-family house detached",
                                   "3-4 Apartments",
                                   "One-family house attached",
                                   "10-19 Apartments",
@@ -236,7 +236,108 @@ race_shares <- tibble(Majority_Race = c("One-family house detached",
                          "%", sep="")))
                    
                    
-knitr::kable(race_shares, caption = "Census tracts in Los Angeles County")
+knitr::kable(struct_shares, caption = "Characteristics of select data from a census tract in Los Angeles")
+```
+Now I'll do a t-test for each commute type.
+
+```{r}
+car <- t.test (BLD == "01")
+bus <- t.test (BLD == "02")
+streetcar <- t.test (BLD == "03")
+subway <- t.test (BLD == "04")
+railroad <- t.test (BLD == "05")
+ferry <- t.test (BLD == "06")
+taxi <- t.test (BLD == "07")
+motorcycle <- t.test (BLD == "08")
+bicycle <- t.test (BLD == "09")
+walked <- t.test (BLD == "10")
+other <- t.test (BLD == "12")
+```
+
+Then I'll create a formatted table with proportions and confidence intervals
+
+```{r}
+commute_shares <- tibble(Commute_types = c("Car, truck or van",
+                                  "Bus or trolleybus",
+                                  "Streetcar",
+                                  "Subway",
+                                  "Railroad",
+                                  "Ferryboat",
+                                  "Taxicab",
+                                  "Motorcycle",
+                                  "Bicycle",
+                                  "Walked",
+                                  "Other"),
+                 Sample_proportion = c(paste(prettyNum(car$estimate*100, 
+                                                         digits = 3), "%"),
+                                         paste(prettyNum(bus$estimate*100, 
+                                                         digits = 3), "%"),
+                                         paste(prettyNum(streetcar$estimate*100, 
+                                                         digits = 3), "%"),
+                                         paste(prettyNum(subway$estimate*100, 
+                                                         digits = 3), "%"),
+                                         paste(prettyNum(railroad$estimate*100, 
+                                                         digits = 3), "%"),
+                                         paste(prettyNum(ferry$estimate*100, 
+                                                         digits = 3), "%"),
+                                         paste(prettyNum(taxi$estimate*100, 
+                                                         digits = 3), "%"),
+                                         paste(prettyNum(motorcycle$estimate*100, 
+                                                         digits = 3), "%"),
+                                         paste(prettyNum(bicycle$estimate*100, 
+                                                         digits = 3), "%"),
+                                         paste(prettyNum(walked$estimate*100, 
+                                                         digits = 3), "%"),
+                                         paste(prettyNum(other$estimate*100, 
+                                                         digits = 3), "%")),
+                 `95-percent confidence interval` = c(
+                   paste(prettyNum(car$conf.int[1]*100, digits=3),
+                         "% to ",
+                         prettyNum(car$conf.int[2]*100, digits=3),
+                         "%", sep=""),
+                   paste(prettyNum(bus$conf.int[1]*100, digits=3),
+                         "% to ",
+                         prettyNum(bus$conf.int[2]*100, digits=3),
+                         "%", sep=""),
+                   paste(prettyNum(streetcar$conf.int[1]*100, digits=3),
+                         "% to ",
+                         prettyNum(streetcar$conf.int[2]*100, digits=3),
+                         "%", sep=""),
+                   paste(prettyNum(subway$conf.int[1]*100, digits=3),
+                         "% to ",
+                         prettyNum(subway$conf.int[2]*100, digits=3),
+                         "%", sep=""),
+                   paste(prettyNum(railroad$conf.int[1]*100, digits=3),
+                         "% to ",
+                         prettyNum(railroad$conf.int[2]*100, digits=3),
+                         "%", sep=""),
+                   paste(prettyNum(ferry$conf.int[1]*100, digits=3),
+                         "% to ",
+                         prettyNum(ferry$conf.int[2]*100, digits=3),
+                         "%", sep=""),
+                   paste(prettyNum(taxi$conf.int[1]*100, digits=3),
+                         "% to ",
+                         prettyNum(taxi$conf.int[2]*100, digits=3),
+                         "%", sep=""),
+                   paste(prettyNum(motorcycle$conf.int[1]*100, digits=3),
+                         "% to ",
+                         prettyNum(motorcycle$conf.int[2]*100, digits=3),
+                         "%", sep=""),
+                   paste(prettyNum(bicycle$conf.int[1]*100, digits=3),
+                         "% to ",
+                         prettyNum(bicycle$conf.int[2]*100, digits=3),
+                         "%", sep=""),
+                         paste(prettyNum(walked$conf.int[1]*100, digits=3),
+                         "% to ",
+                         prettyNum(walked$conf.int[2]*100, digits=3),
+                         "%", sep=""),
+                   paste(prettyNum(other$conf.int[1]*100, digits=3),
+                         "% to ",
+                         prettyNum(other$conf.int[2]*100, digits=3),
+                         "%", sep="")))
+                   
+                   
+knitr::kable(struct_shares, caption = "Characteristics of select data from a census tract in Los Angeles")
 ```
 
 
