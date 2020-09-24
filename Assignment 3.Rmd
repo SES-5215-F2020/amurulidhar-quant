@@ -1,0 +1,276 @@
+---
+title: "Assignment 3"
+author: "Arnav Murulidhar"
+date: "9/22/2020"
+output: html_document
+---
+
+The libraries needed for the assignment:
+
+```{r load libraries, message=FALSE}
+library(tidyverse)
+library(ggplot2)
+```
+
+Then I'll load the dataset from Assignment 1 and attach it to the search path
+
+```{r load and attach data, message=FALSE}
+tract_data <- read_csv("commutersLosAngelesCA2018.csv")
+attach(tract_data)
+```
+
+### List of variables (from Assignment 1):
+
+1. Property value (continuous) : VALP
+
+2. Units in structure (categorical) : BLD
+
+3. Total person's income (continuous) : PINCP
+
+4. Means of transportation to work (categorical) : JWTR
+
+5. Travel time to work (continuous) : JWMNP
+
+I found it much easier to read the data keeping the structure type and commute type labels as the numbers used by the Census bureau, as the long text labels cluttered up many of the tables. Instead, here is a key for easy translation:
+
+Building Types
+
+1. Mobile home or trailer
+
+2. One-family house detached
+
+3. One-family house attached
+
+4. Two Apartments
+
+5. 3-4 Apartments
+
+6. 5-9 Apartments
+
+7. 10-19 Apartments
+
+8. 20-49 Apartments
+
+9. 50 or more Apartments
+
+10. Boat, RV, Van, etc.
+
+
+Commute Types
+
+1. Car, truck or van
+
+2. Bus or trolleybus
+
+3. Streetcar
+
+4. Subway
+
+5. Railroad
+
+6. Ferryboat
+
+7. Taxicab
+
+8. Motorcycle
+
+9. Bicycle
+
+10. Walked
+
+12. Other
+
+``` {r VALP PINCP Relationship}
+correlation <- cor.test(VALP, PINCP)
+
+correlation
+
+ggplot(tract_data, aes(x = VALP, y = PINCP)) +
+  geom_point(size = 0.5, alpha = 0.25, position = "jitter") +
+  geom_smooth() +
+  theme_bw() +
+  scale_x_continuous(name = "Property value ($)") +
+  scale_y_continuous(name = "Income ($)") +
+  annotate(geom = "text", x = 0, y = 1000000,
+           label = paste("Correlation (95-percent confidence):",
+                         prettyNum(correlation$conf.int[1], digits = 2), 
+                         "to",
+                         prettyNum(correlation$conf.int[2], digits = 2)),
+           hjust = 0)
+```
+
+Their is a relatively strong positive correlation between income and property value.
+
+``` {r VALP JWMNP Relationship}
+correlation <- cor.test(VALP, JWMNP)
+
+correlation
+
+ggplot(tract_data, aes(x = VALP, y = JWMNP)) +
+  geom_point(size = 0.5, alpha = 0.25, position = "jitter") +
+  geom_smooth() +
+  theme_bw() +
+  scale_x_continuous(name = "Property value ($)") +
+  scale_y_continuous(name = "Commute time (minutes)") +
+  annotate(geom = "text", x = 0, y = 150,
+           label = paste("Correlation (95-percent confidence):",
+                         prettyNum(correlation$conf.int[1], digits = 2), 
+                         "to",
+                         prettyNum(correlation$conf.int[2], digits = 2)),
+           hjust = 0)
+```
+
+The correlation is pretty weak but slightly negative.
+
+``` {r PINCP JWMNP Relationship}
+correlation <- cor.test(PINCP, JWMNP)
+
+correlation
+
+ggplot(tract_data, aes(x = PINCP, y = JWMNP)) +
+  geom_point(size = 0.5, alpha = 0.25, position = "jitter") +
+  geom_smooth() +
+  theme_bw() +
+  scale_x_continuous(name = "Income ($)") +
+  scale_y_continuous(name = "Commute time (minutes)") +
+  annotate(geom = "text", x = 0, y = 150,
+           label = paste("Correlation (95-percent confidence):",
+                         prettyNum(correlation$conf.int[1], digits = 2), 
+                         "to",
+                         prettyNum(correlation$conf.int[2], digits = 2)),
+           hjust = 0)
+```
+
+A pretty weak and slightly negative correlation, though if you were to look at only incomes below about $80,000 you would see a strong positive correlation.
+
+
+``` {r VALP BLD Relationship}
+anova <- aov(VALP ~ BLD)
+
+summary(anova)
+
+differences <- TukeyHSD(anova)
+
+as_tibble(cbind(pair = row.names(differences$BLD),
+                differences$BLD))
+
+ggplot(tract_data, aes(x = BLD, y = VALP)) +
+  geom_boxplot() +
+  theme_bw() +
+  scale_x_discrete(name = "Type of Structure") +
+  scale_y_continuous(name = "Property Value", 
+                     breaks = seq(0, 6000000, by = 1000000),
+                     labels = paste("$", 
+                                    prettyNum(seq(0, 6000000, by = 1000000),
+                                              big.mark = ","))) 
+```
+
+``` {r VALP JWTR Relationship}
+anova <- aov(VALP ~ JWTR)
+
+summary(anova)
+
+differences <- TukeyHSD(anova)
+
+as_tibble(cbind(pair = row.names(differences$JWTR),
+                differences$JWTR))
+
+ggplot(tract_data, aes(x = JWTR, y = VALP)) +
+  geom_boxplot() +
+  theme_bw() +
+  scale_x_discrete(name = "Commute Type") +
+  scale_y_continuous(name = "Property Value", 
+                     breaks = seq(0, 6000000, by = 1000000),
+                     labels = paste("$", 
+                                    prettyNum(seq(0, 6000000, by = 1000000),
+                                              big.mark = ","))) 
+```
+
+
+``` {r PINCP BLD Relationship}
+anova <- aov(PINCP ~ BLD)
+
+summary(anova)
+
+differences <- TukeyHSD(anova)
+
+as_tibble(cbind(pair = row.names(differences$BLD),
+                differences$BLD))
+
+ggplot(tract_data, aes(x = BLD, y = PINCP)) +
+  geom_boxplot() +
+  theme_bw() +
+  scale_x_discrete(name = "Type of Structure") +
+  scale_y_continuous(name = "Income", 
+                     breaks = seq(0, 1500000, by = 100000),
+                     labels = paste("$", 
+                                    prettyNum(seq(0, 1500000, by = 100000),
+                                              big.mark = ","))) 
+```
+
+``` {r PINCP JWTR Relationship}
+anova <- aov(PINCP ~ JWTR)
+
+summary(anova)
+
+differences <- TukeyHSD(anova)
+
+as_tibble(cbind(pair = row.names(differences$JWTR),
+                differences$JWTR))
+
+ggplot(tract_data, aes(x = JWTR, y = PINCP)) +
+  geom_boxplot() +
+  theme_bw() +
+  scale_x_discrete(name = "Commute Type") +
+  scale_y_continuous(name = "Income", 
+                     breaks = seq(0, 1500000, by = 100000),
+                     labels = paste("$", 
+                                    prettyNum(seq(0, 1500000, by = 100000),
+                                              big.mark = ","))) 
+```
+
+``` {r JWMNP BLD Relationship}
+anova <- aov(JWMNP ~ BLD)
+
+summary(anova)
+
+differences <- TukeyHSD(anova)
+
+as_tibble(cbind(pair = row.names(differences$BLD),
+                differences$BLD))
+
+ggplot(tract_data, aes(x = BLD, y = JWMNP)) +
+  geom_boxplot() +
+  theme_bw() +
+  scale_x_discrete(name = "Type of Structure") +
+  scale_y_continuous(name = "Commute time", 
+                     breaks = seq(0, 150, by = 30)) 
+```
+
+
+``` {r JWMNP JWTR Relationship}
+anova <- aov(JWMNP ~ JWTR)
+
+summary(anova)
+
+differences <- TukeyHSD(anova)
+
+as_tibble(cbind(pair = row.names(differences$JWTR),
+                differences$JWTR))
+
+ggplot(tract_data, aes(x = JWTR, y = JWMNP)) +
+  geom_boxplot() +
+  theme_bw() +
+  scale_x_discrete(name = "Commute Type") +
+  scale_y_continuous(name = "Commute time", 
+                     breaks = seq(0, 150, by = 30)) 
+```
+
+``` {r BLD JWTR Relationship}
+chi_sq <- chisq.test(BLD, JWTR) 
+
+chi_sq
+
+chi_sq$observed
+```
+
