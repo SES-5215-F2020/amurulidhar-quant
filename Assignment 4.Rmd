@@ -1,0 +1,76 @@
+---
+title: "Assignment 4"
+author: "Arnav Murulidhar"
+date: "9/24/2020"
+output: html_document
+---
+
+```{r load libraries, message=FALSE}
+library(tidyverse)
+```
+I found it much easier to read the data keeping the structure type and commute type labels as the numbers used by the Census bureau, as the long text labels cluttered up many of the tables. Instead, here is a key for easy translation:
+
+Building Types
+
+1. Mobile home or trailer
+
+2. One-family house detached
+
+3. One-family house attached
+
+4. Two Apartments
+
+5. 3-4 Apartments
+
+6. 5-9 Apartments
+
+7. 10-19 Apartments
+
+8. 20-49 Apartments
+
+9. 50 or more Apartments
+
+10. Boat, RV, Van, etc.
+
+
+Commute Types
+
+1. Car, truck or van
+
+2. Bus or trolleybus
+
+3. Streetcar
+
+4. Subway
+
+5. Railroad
+
+6. Ferryboat
+
+7. Taxicab
+
+8. Motorcycle
+
+9. Bicycle
+
+10. Walked
+
+12. Other
+
+
+```{r load and attach data, message=FALSE}
+tract_data <- read_csv("commutersLosAngelesCA2018.csv")
+attach(tract_data)
+```
+
+``` {r linear reg}
+model <- lm(PINCP ~ BLD + VALP + JWTR + JWMNP, 
+            data = tract_data)
+
+summary(model)
+```
+
+## The Interesting takeaways
+I'm surprised that those living in mobile homes (the base housing type) earned more than those living in a duplex (BLD04). Everything else in the housing type category is as expected.
+
+I found that those who commuted by bicycle, motorcycle or train actually earned more than those that commuted by car, which is opposite to what you would you see in most (especially developing) countries. In places like India, commuting by car is one of the utmost luxuries. 
