@@ -74,3 +74,15 @@ summary(model)
 I'm surprised that those living in mobile homes (the base housing type) earned more than those living in a duplex (BLD04). Everything else in the housing type category is as expected.
 
 I found that those who commuted by bicycle, motorcycle or train actually earned more than those that commuted by car, which is opposite to what you would you see in most (especially developing) countries. In places like India, commuting by car is one of the utmost luxuries. 
+
+The model fit is surprisingly high, at almost 16%! 
+
+The coefficent estimate of a deatched home is roughly $4,800 meaning, that on average, when controlling for all other variables, someone living in one of them earns that much more than someone living in a mobile home. Someone in a attached singly family home would earn $4,200 more. Surprisingly, someone living in a duplex would earn about $10,000 less.
+
+The coefficient estimate for propert value was very small, $0.05, meaning that for every increased dollar in property value, on average, income went up by 5 cents.
+
+The coefficient estimate for buses was -$20,000 meaning that those who road buses on average earned that much less than those in cars. A slightly smaller income for those who instead took streetcars (LA has streetcars?) as they earned about $8000 less. LA Metro commuters earned about $2,200 less.
+
+The coefficient estimate of commute time is $207, meaning that for every extra minute spent commuting, income increased on average by that much. 
+
+Only the predictions for the variables: 5-9 apartments, 20-49 apartments, 50+ apartments, property value, commuting by bus, bicycle, walking, other and commute time are statistically significant as they have p-values that are less than 0.05
