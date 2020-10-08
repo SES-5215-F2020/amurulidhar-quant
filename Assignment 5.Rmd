@@ -1,0 +1,93 @@
+---
+title: "Assignment 5"
+author: "Arnav Murulidhar"
+date: "10/5/2020"
+output: html_document
+---
+
+```{r load libraries, message=FALSE}
+library(tidyverse)
+library(jtools)
+library(interactions)
+library(knitr)
+```
+
+I found it much easier to read the data keeping the structure type and commute type labels as the numbers used by the Census bureau, as the long text labels cluttered up many of the tables. Instead, here is a key for easy translation:
+
+Building Types
+
+1. Mobile home or trailer
+
+2. One-family house detached
+
+3. One-family house attached
+
+4. Two Apartments
+
+5. 3-4 Apartments
+
+6. 5-9 Apartments
+
+7. 10-19 Apartments
+
+8. 20-49 Apartments
+
+9. 50 or more Apartments
+
+10. Boat, RV, Van, etc.
+
+
+Commute Types
+
+1. Car, truck or van
+
+2. Bus or trolleybus
+
+3. Streetcar
+
+4. Subway
+
+5. Railroad
+
+6. Ferryboat
+
+7. Taxicab
+
+8. Motorcycle
+
+9. Bicycle
+
+10. Walked
+
+12. Other
+
+```{r load and attach data, message=FALSE}
+tract_data <- read_csv("commutersLosAngelesCA2018.csv")
+attach(tract_data)
+```
+``` {r linear reg}
+model1 <- lm(PINCP ~ BLD + VALP + JWTR + JWMNP, 
+            data = tract_data)
+
+summary(model1)
+```
+
+``` {r log transform}
+model2 <- lm(PINCP ~ BLD + VALP + JWTR + log(JWMNP), 
+            data = tract_data)
+
+summary(model2)
+```
+
+``` {r interaction term}
+model3 <- lm(PINCP ~ BLD + VALP + JWTR + log(JWMNP) +
+               log(JWMNP):JWTR,
+            data = tract_data)
+
+summary(model3)
+```
+
+
+I think the log transform of commute time best explains the data as the bulk of commuters have about the same commute time, regardless of income, however you do start to notice more interesting variations when commute time gets really long, and so doubling the value make's sense.
+
+The interaction terms reveal how certain modes of transportation are disproportionately effected by a double commute time, particularly by subway, as they lose about $5100 in income. Bus commuters, interestingly enough, have barely any change income despite if their commutes double. Without jumping to too many conclusions, one could create some inferences on the type of occupations bus commuters have (particularly in LA) and how their incomes may be capped regardless of commute times.
